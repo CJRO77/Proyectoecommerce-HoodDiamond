@@ -159,7 +159,7 @@ function Checkout() {
           Total: ${total.toLocaleString()}
         </h4>
 
-        // Sección de método de pago 
+        {/* Sección de método de pago */}
 
         <div className="mb-4">
           <h4 className="mb-3 text-center fw-bold">
@@ -236,7 +236,7 @@ function Checkout() {
             </div>
           </div>
 
-          // Logos de medios de pago
+          {/* Logos de medios de pago */}
 
           <div className="payment-logos text-center mt-4">
             <p className="fw-semibold mb-3">

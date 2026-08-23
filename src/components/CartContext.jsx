@@ -84,6 +84,19 @@ export function CartProvider({ children }) {
     const producto = cart.find((p) => p._id === id);
     if (!producto) return;
 
+    // Preguntamos ANTES de borrar nada, así "Cancelar" realmente cancela
+
+    const result = await Swal.fire({
+      title: "¿Eliminar producto?",
+      text: "Se quitará del carrito de compras.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
       const res = await fetch(`http://localhost:3000/productos/${id}`);
       const data = await res.json();
@@ -98,37 +111,15 @@ export function CartProvider({ children }) {
 
       setCart((prev) => prev.filter((p) => p._id !== id));
       window.dispatchEvent(new Event("stockUpdated"));
-
-    const result = await Swal.fire({
-    title: "¿Eliminar producto?",
-    text: "Se quitará del carrito de compras.",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Sí, eliminar",
-    cancelButtonText: "Cancelar",
-   });
-
-if (!result.isConfirmed) return;
-    
     } catch (error) { console.log(error); }
   };
 
-
-
-  const clearCart = async () => {
-    try {
-      for (const item of cart) {
-        const res = await fetch(`http://localhost:3000/productos/${item._id}`);
-        const data = await res.json();
-        await fetch(`http://localhost:3000/productos/${item._id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...data, stock: data.stock + item.cantidad }),
-        });
-      }
-      setCart([]);
-      window.dispatchEvent(new Event("stockUpdated"));
-    } catch (error) { console.log(error); }
+  const clearCart = () => {
+    // Solo vaciamos el carrito. El stock ya fue descontado
+    // correctamente cuando se agregaron los productos (increase),
+    // así que NO hay que devolverlo: la compra ya se concretó.
+    setCart([]);
+    window.dispatchEvent(new Event("stockUpdated"));
   };
 
   const cartCount = cart.reduce((acc, p) => acc + p.cantidad, 0);

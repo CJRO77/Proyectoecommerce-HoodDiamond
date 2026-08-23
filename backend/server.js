@@ -20,6 +20,14 @@ try {
   process.exit(1);
 }
 
+let Orden;
+try {
+  Orden = require("./models/Orden");
+} catch (err) {
+  console.error("Error al importar el modelo de Orden:", err.message);
+  process.exit(1);
+}
+
 // Conexión a MongoDB Atlas con salvavidas
 
 if (!process.env.MONGO_URI) {
@@ -31,7 +39,7 @@ if (!process.env.MONGO_URI) {
 
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("🚀 Conectado exitosamente a MongoDB Atlas"))
+  .then(() => console.log("Conexión exitosa a MongoDB Atlas"))
   .catch((err) =>
     console.error(" Error de conexión a MongoDB:", err.message),
   );
@@ -49,6 +57,7 @@ app.get("/productos", async (req, res) => {
     const productos = await Producto.find();
     res.json(productos);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Error al obtener productos" });
   }
 });
@@ -62,6 +71,7 @@ app.get("/productos/:id", async (req, res) => {
       return res.status(404).json({ error: "Producto no encontrado" });
     res.json(producto);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Error al buscar el producto" });
   }
 });
@@ -74,6 +84,7 @@ app.post("/productos", async (req, res) => {
     await nuevoProducto.save();
     res.status(201).json(nuevoProducto);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Error al crear producto" });
   }
 });
@@ -82,13 +93,14 @@ app.post("/productos", async (req, res) => {
 
 app.put("/productos/:id", async (req, res) => {
   try {
-    const producto = await Producto.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+   const producto = await Producto.findByIdAndUpdate(req.params.id, req.body, {
+  returnDocument: "after",
+});
     if (!producto)
       return res.status(404).json({ error: "Producto no encontrado" });
     res.json(producto);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Error al actualizar producto" });
   }
 });
@@ -102,9 +114,37 @@ app.delete("/productos/:id", async (req, res) => {
       return res.status(404).json({ error: "Producto no encontrado" });
     res.json({ message: "Producto eliminado" });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Error al eliminar producto" });
   }
 });
+
+// Crear nueva orden (checkout)
+
+app.post("/ordenes", async (req, res) => {
+  try {
+    const nuevaOrden = new Orden(req.body);
+    await nuevaOrden.save();
+    res.status(201).json(nuevaOrden);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al guardar la orden" });
+  }
+});
+
+// Obtener todas las órdenes (útil para un futuro panel de administración)
+
+app.get("/ordenes", async (req, res) => {
+  try {
+    const ordenes = await Orden.find();
+    res.json(ordenes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener las órdenes" });
+  }
+});
+
+// Iniciar el servidor
 
 app.listen(3000, () => {
   console.log("Servidor corriendo en http://localhost:3000");

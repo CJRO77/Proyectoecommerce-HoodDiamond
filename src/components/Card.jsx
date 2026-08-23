@@ -64,6 +64,7 @@ function Card({ product, setProductos }) {
   };
 
   return (
+    
     //contenedor de cada producto en la lista de productos
 
     <div className="card-item">

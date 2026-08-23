@@ -14,7 +14,7 @@ import { CartProvider } from "./components/CartContext";
 function App() {
 
   return (
-              // Envolvemos toda la aplicación con el CartProvider para que el contexto esté disponible en todos los componentes
+     // Envolvemos toda la aplicación con el CartProvider para que el contexto esté disponible en todos los componentes
     
    <CartProvider>
 
